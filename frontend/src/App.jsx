@@ -1,44 +1,23 @@
 /**
  * App.jsx — Routes + navigation
  */
-import { BrowserRouter, Link, Route, Routes, useLocation } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
+import {
+  BrowserRouter,
+  Link,
+  Route,
+  Routes,
+  useLocation,
+} from 'react-router-dom';
+import Navbar from './components/Navbar.jsx';
+import ProtectedRoute from './components/ProtectedRoute.jsx';
 import CreatePoll from './pages/CreatePoll.jsx';
-import Vote from './pages/Vote.jsx';
+import Dashboard from './pages/Dashboard.jsx';
+import Landing from './pages/Landing.jsx';
+import Login from './pages/Login.jsx';
+import Register from './pages/Register.jsx';
 import Results from './pages/Results.jsx';
-
-function Home() {
-  return (
-    <div className="page-home page-home-bg">
-      <div className="text-3xl fw-700" style={{ marginBottom: 16 }}>
-        ⛓ VoteChain
-      </div>
-      <h1 className="text-2xl fw-700" style={{ marginBottom: 12, maxWidth: 520 }}>
-        Votes sécurisés.
-        <br />
-        Résultats instantanés.
-      </h1>
-      <p className="text-lg" style={{ color: 'var(--color-text-secondary)', marginBottom: 32, maxWidth: 440 }}>
-        Lancez un sondage en quelques clics.
-      </p>
-      <Link to="/create" className="btn btn-primary btn-lg">
-        Créer un sondage →
-      </Link>
-      <div
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: 12,
-          justifyContent: 'center',
-          marginTop: 40,
-        }}
-      >
-        <span className="badge badge-primary">Anti-fraude</span>
-        <span className="badge badge-primary">Temps réel</span>
-        <span className="badge badge-primary">Sans compte</span>
-      </div>
-    </div>
-  );
-}
+import Vote from './pages/Vote.jsx';
 
 function NotFound() {
   return (
@@ -56,33 +35,101 @@ function NotFound() {
   );
 }
 
-function Navbar() {
+function PageTransition({ children }) {
   return (
-    <header className="navbar">
-      <Link to="/" className="text-base fw-700" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span>⛓</span> VoteChain
-      </Link>
-      <Link to="/create" className="btn btn-primary btn-sm">
-        Créer un sondage
-      </Link>
-    </header>
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -8 }}
+      transition={{ duration: 0.25, ease: 'easeOut' }}
+    >
+      {children}
+    </motion.div>
   );
 }
 
 function AppRoutes() {
   const location = useLocation();
-  const hideNav = location.pathname === '/';
+  const noNavbar = ['/login', '/register'];
+  const hideNav = noNavbar.includes(location.pathname);
 
   return (
-    <div style={{ minHeight: '100vh' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       {!hideNav && <Navbar />}
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/create" element={<CreatePoll />} />
-        <Route path="/vote/:pollId" element={<Vote />} />
-        <Route path="/results/:pollId" element={<Results />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+      <main style={{ flex: 1 }}>
+        <AnimatePresence mode="wait" initial={false}>
+          <Routes location={location} key={location.pathname}>
+            <Route
+              path="/"
+              element={
+                <PageTransition>
+                  <Landing />
+                </PageTransition>
+              }
+            />
+            <Route
+              path="/login"
+              element={
+                <PageTransition>
+                  <Login />
+                </PageTransition>
+              }
+            />
+            <Route
+              path="/register"
+              element={
+                <PageTransition>
+                  <Register />
+                </PageTransition>
+              }
+            />
+            <Route
+              path="/dashboard"
+              element={
+                <PageTransition>
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                </PageTransition>
+              }
+            />
+            <Route
+              path="/create"
+              element={
+                <PageTransition>
+                  <ProtectedRoute>
+                    <CreatePoll />
+                  </ProtectedRoute>
+                </PageTransition>
+              }
+            />
+            <Route
+              path="/vote/:pollId"
+              element={
+                <PageTransition>
+                  <Vote />
+                </PageTransition>
+              }
+            />
+            <Route
+              path="/results/:pollId"
+              element={
+                <PageTransition>
+                  <Results />
+                </PageTransition>
+              }
+            />
+            <Route
+              path="*"
+              element={
+                <PageTransition>
+                  <NotFound />
+                </PageTransition>
+              }
+            />
+          </Routes>
+        </AnimatePresence>
+      </main>
     </div>
   );
 }

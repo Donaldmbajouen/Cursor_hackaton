@@ -1,6 +1,7 @@
 /**
  * api.js — Client HTTP VoteChain
  */
+import { getAuthToken } from '../utils/auth.js';
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -21,7 +22,17 @@ export async function apiFetch(path, options = {}) {
     'Content-Type': 'application/json',
     ...(options.headers || {}),
   };
-  const res = await fetch(`${BASE_URL}${path}`, { ...options, headers });
+  if (options.auth !== false) {
+    const token = getAuthToken();
+    if (token && !headers.Authorization) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+  }
+  const { auth: _ignored, ...fetchOpts } = options;
+  const res = await fetch(`${BASE_URL}${path}`, { ...fetchOpts, headers });
+  if (res.status === 204) {
+    return null;
+  }
   let body;
   try {
     body = await res.json();
@@ -31,7 +42,9 @@ export async function apiFetch(path, options = {}) {
   if (!res.ok) {
     const msg =
       body.error || formatDetail(body.detail) || res.statusText || 'Erreur réseau';
-    throw new Error(msg);
+    const err = new Error(msg);
+    err.status = res.status;
+    throw err;
   }
   return body;
 }
@@ -64,4 +77,36 @@ export function castVote(pollId, data) {
     method: 'POST',
     body: JSON.stringify(data),
   });
+}
+
+export function register({ email, password, name }) {
+  return apiFetch('/api/auth/register', {
+    method: 'POST',
+    body: JSON.stringify({ email, password, name }),
+    auth: false,
+  });
+}
+
+export function login({ email, password }) {
+  return apiFetch('/api/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ email, password }),
+    auth: false,
+  });
+}
+
+export function fetchMe() {
+  return apiFetch('/api/auth/me');
+}
+
+export function fetchMyPolls() {
+  return apiFetch('/api/me/polls');
+}
+
+export function fetchMyStats() {
+  return apiFetch('/api/me/stats');
+}
+
+export function deleteMyPoll(pollId) {
+  return apiFetch(`/api/me/polls/${pollId}`, { method: 'DELETE' });
 }

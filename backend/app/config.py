@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     JWT_SECRET: str = Field(..., min_length=1)
     JWT_ALGORITHM: str = "HS256"
     JWT_EXPIRE_HOURS: int = 1
+    JWT_USER_EXPIRE_HOURS: int = 168
     FRONTEND_URL: str = "http://localhost:5173"
     # Liste séparée par des virgules ; utilisée par CORS (Vite peut prendre 5173, 5174, etc.)
     CORS_ORIGINS: str = (

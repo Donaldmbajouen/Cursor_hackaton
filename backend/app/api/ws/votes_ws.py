@@ -6,7 +6,7 @@ import json
 from collections import defaultdict
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, WebSocket, WebSocketException
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, WebSocketException
 
 from app.db.pool import get_pool
 from app.redis_client import get_redis

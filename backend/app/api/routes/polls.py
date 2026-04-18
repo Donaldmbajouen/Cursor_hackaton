@@ -8,7 +8,7 @@ from uuid import uuid4
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, ConfigDict
 
-from app.deps import DbConn, RedisDep
+from app.deps import CurrentUser, DbConn, RedisDep
 from app.services import fraud_service, poll_service, vote_counter_service
 
 router = APIRouter(prefix="/api/polls", tags=["polls"])
@@ -35,7 +35,12 @@ def _poll_public(p: dict) -> dict:
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
-async def create_poll_route(body: PollCreate, db: DbConn, redis: RedisDep) -> dict:
+async def create_poll_route(
+    body: PollCreate,
+    db: DbConn,
+    redis: RedisDep,
+    user: CurrentUser,
+) -> dict:
     creator_token = str(uuid4())
     async with db.transaction():
         poll = await poll_service.create_poll(
@@ -44,6 +49,7 @@ async def create_poll_route(body: PollCreate, db: DbConn, redis: RedisDep) -> di
             body.options,
             body.closes_at,
             creator_token,
+            user_id=user["id"],
         )
         await fraud_service.create_session(db, creator_token, poll["id"])
     results = await poll_service.get_poll_results(db, poll["id"])

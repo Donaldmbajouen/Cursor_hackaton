@@ -8,7 +8,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi.errors import RateLimitExceeded
 
-from app.api.routes import polls, votes
+from app.api.routes import auth, me, polls, votes
 from app.api.ws import votes_ws
 from app.config import cors_allow_origins, settings
 from app.db.pool import close_pool, create_pool
@@ -37,6 +37,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth.router)
+app.include_router(me.router)
 app.include_router(polls.router)
 app.include_router(votes.router)
 app.include_router(votes_ws.router)
