@@ -6,24 +6,23 @@ from collections.abc import AsyncGenerator
 from typing import Annotated
 
 import asyncpg
+import redis.asyncio as aioredis
 from fastapi import Depends
-from redis.asyncio import Redis
 
 from app.db.pool import get_pool
 from app.redis_client import get_redis
 
 
-async def get_connection() -> AsyncGenerator[asyncpg.Connection, None]:
-    """TODO Dev : traçage, timeouts, lecture seule vs écriture."""
-    pool = get_pool()
+async def get_db() -> AsyncGenerator[asyncpg.Connection, None]:
+    pool = await get_pool()
     async with pool.acquire() as conn:
         yield conn
 
 
-def get_redis_client() -> Redis:
-    """TODO Dev : scoper par request si besoin."""
-    return get_redis()
+async def get_redis_dep() -> AsyncGenerator[aioredis.Redis, None]:
+    redis = await get_redis()
+    yield redis
 
 
-DbConn = Annotated[asyncpg.Connection, Depends(get_connection)]
-RedisClient = Annotated[Redis, Depends(get_redis_client)]
+DbConn = Annotated[asyncpg.Connection, Depends(get_db)]
+RedisDep = Annotated[aioredis.Redis, Depends(get_redis_dep)]

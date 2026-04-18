@@ -1,7 +1,8 @@
 """
-config.py — Paramètres d’environnement (Pydantic Settings)
+config.py — Paramètres d'environnement (Pydantic Settings)
 Responsable : Dev Backend
 """
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -12,10 +13,13 @@ class Settings(BaseSettings):
         case_sensitive=False,
     )
 
-    port: int = 3000
-    jwt_secret: str = "change_me_in_production"
-    database_url: str = "postgresql://votechain:votechain@localhost:5432/votechain"
-    redis_url: str = "redis://localhost:6379/0"
+    DATABASE_URL: str = Field(..., description="postgresql://...")
+    REDIS_URL: str = Field(..., description="redis://...")
+    JWT_SECRET: str = Field(..., min_length=1)
+    JWT_ALGORITHM: str = "HS256"
+    JWT_EXPIRE_HOURS: int = 1
+    FRONTEND_URL: str = "http://localhost:5173"
+    ENVIRONMENT: str = "development"
 
 
 settings = Settings()
