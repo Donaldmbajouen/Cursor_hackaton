@@ -1,10 +1,10 @@
 """
-jwt_auth.py — Dépendance FastAPI pour JWT Bearer
-Responsable : Dev Backend (sécurité)
+jwt_auth.py — Placeholder pour futurs tokens « créateur ».
+Les votes utilisent le flux PyJWT dédié dans app.services.jwt_service.
 """
 from typing import Annotated
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 security = HTTPBearer(auto_error=False)
@@ -13,10 +13,8 @@ security = HTTPBearer(auto_error=False)
 async def jwt_auth(
     credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(security)],
 ) -> dict | None:
-    """TODO Dev : décoder JWT, valider claims, retourner payload ou 401."""
     if credentials is None:
         return None
-    # TODO : vérifier signature avec jwt_service
     return None
 
 

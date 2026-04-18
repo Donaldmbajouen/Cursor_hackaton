@@ -19,7 +19,8 @@ Scaffold fullstack : **React + Vite** (frontend), **FastAPI** (backend), **Postg
 ### Stack complète (Docker)
 
 ```bash
-docker compose up --build
+docker-compose up --build
+# ou (Compose v2 intégré à Docker) : docker compose up --build
 ```
 
 - Frontend : http://localhost:5173  

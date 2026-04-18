@@ -22,6 +22,9 @@ CREATE TABLE IF NOT EXISTS votes (
 
 CREATE INDEX IF NOT EXISTS idx_votes_poll_id ON votes (poll_id);
 
+CREATE UNIQUE INDEX IF NOT EXISTS uq_votes_poll_id_ip_hash
+  ON votes (poll_id, ip_hash);
+
 CREATE TABLE IF NOT EXISTS sessions (
   token TEXT PRIMARY KEY,
   poll_id TEXT NOT NULL REFERENCES polls(id) ON DELETE CASCADE,

@@ -13,6 +13,7 @@ from app.api.routes import polls, votes
 from app.api.ws import votes_ws
 from app.config import settings
 from app.db.pool import close_pool, init_pool
+from app.middlewares.client_ip import ClientIPMiddleware
 from app.middlewares.rate_limiter import limiter
 from app.redis_client import close_redis, init_redis
 
@@ -37,6 +38,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+# Dernier enregistrement = premier sur la requête entrante (Starlette) : client_ip avant CORS
+app.add_middleware(ClientIPMiddleware)
 
 app.include_router(polls.router, prefix="/api/polls", tags=["polls"])
 app.include_router(votes.router, prefix="/api/votes", tags=["votes"])

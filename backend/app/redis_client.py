@@ -8,9 +8,11 @@ _redis: Redis | None = None
 
 
 async def init_redis(url: str) -> Redis:
-    """TODO Dev : decode_responses, healthcheck, TLS si prod."""
     global _redis
-    _redis = Redis.from_url(url)
+    _redis = Redis.from_url(
+        url,
+        decode_responses=True,
+    )
     return _redis
 
 

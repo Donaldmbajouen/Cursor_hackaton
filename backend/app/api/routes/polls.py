@@ -3,12 +3,14 @@ polls.py — Routes /api/polls
 Responsable : Dev Backend (API)
 """
 import logging
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, HTTPException, Query, status
 
 from app.deps import DbConn, RedisClient
 from app.schemas.polls import PollCreate, PollRead
-from app.services import poll_service, vote_counter_service
+from app.schemas.sessions import OpenSessionResponse
+from app.services import poll_service, session_service, vote_counter_service
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -32,6 +34,44 @@ async def list_polls(
         "limit": limit,
         "offset": offset,
     }
+
+
+@router.post(
+    "/{poll_id}/session",
+    status_code=status.HTTP_201_CREATED,
+    response_model=OpenSessionResponse,
+    tags=["polls", "vote-session"],
+)
+async def open_vote_session(
+    poll_id: str,
+    db: DbConn,
+) -> OpenSessionResponse:
+    now = datetime.now(timezone.utc)
+    poll = await poll_service.get_poll_by_id(db, poll_id)
+    if poll is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Poll not found",
+        )
+    close = poll["closes_at"]
+    if close.tzinfo is None:
+        close = close.replace(tzinfo=timezone.utc)
+    if now >= close:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Poll is closed or closing time has passed",
+        )
+    row = await session_service.create_session(db, poll_id)
+    if row is None:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Could not create session",
+        )
+    return OpenSessionResponse(
+        session_token=row["token"],
+        poll_id=row["poll_id"],
+        created_at=row["created_at"],
+    )
 
 
 @router.get("/{poll_id}")

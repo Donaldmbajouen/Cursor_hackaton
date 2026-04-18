@@ -5,6 +5,6 @@ Responsable : Dev 1 (Senior - Anti-fraude)
 from fastapi import Request
 
 
-async def antifraud_check(request: Request) -> None:
-    """TODO Dev 1 : scorer la requête, lever HTTPException si bloqué."""
-    pass
+async def antifraud_check(_request: Request) -> None:
+    """Déplacé : contrôles dans vote_service (session, IP Redis, empreinte JWT)."""
+    return None
