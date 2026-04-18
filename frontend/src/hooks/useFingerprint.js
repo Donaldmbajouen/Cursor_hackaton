@@ -1,18 +1,37 @@
 /**
- * useFingerprint.js — Empreinte navigateur pour anti-fraude
- * Responsable : Dev Frontend (sécurité)
+ * useFingerprint.js — Empreinte navigateur
  */
 import { useEffect, useState } from 'react';
 import { getFingerprint } from '../utils/fingerprint.js';
 
-// TODO Dev : cache localStorage, rotation, privacy notice
 export function useFingerprint() {
-  const [fp, setFp] = useState(null);
+  const [fingerprint, setFingerprint] = useState('');
+  const [screenRes, setScreenRes] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    void getFingerprint;
-    // TODO : setFp(await getFingerprint())
+    let cancelled = false;
+    (async () => {
+      try {
+        const r = await getFingerprint();
+        if (!cancelled) {
+          setFingerprint(r.fingerprint);
+          setScreenRes(r.screenRes);
+        }
+      } catch (e) {
+        console.warn('[VoteChain] getFingerprint', e);
+        if (!cancelled) {
+          setFingerprint('');
+          setScreenRes('');
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  return fp;
+  return { fingerprint, screenRes, loading };
 }

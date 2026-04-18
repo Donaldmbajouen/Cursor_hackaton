@@ -1,23 +1,21 @@
 """
-jwt_auth.py — Dépendance FastAPI pour JWT Bearer
+jwt_auth.py — JWT Bearer optionnel
 Responsable : Dev Backend (sécurité)
 """
-from typing import Annotated
+from fastapi import Request
+from jose import JWTError
 
-from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-
-security = HTTPBearer(auto_error=False)
+from app.services import jwt_service
 
 
-async def jwt_auth(
-    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(security)],
-) -> dict | None:
-    """TODO Dev : décoder JWT, valider claims, retourner payload ou 401."""
-    if credentials is None:
+async def optional_jwt_verify(request: Request) -> dict | None:
+    auth = request.headers.get("Authorization")
+    if not auth or not auth.lower().startswith("bearer "):
         return None
-    # TODO : vérifier signature avec jwt_service
-    return None
-
-
-JwtUser = Annotated[dict | None, Depends(jwt_auth)]
+    token = auth[7:].strip()
+    if not token:
+        return None
+    try:
+        return jwt_service.verify_vote_token(token)
+    except JWTError:
+        return None

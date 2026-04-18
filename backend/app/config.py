@@ -1,7 +1,8 @@
 """
-config.py — Paramètres d’environnement (Pydantic Settings)
+config.py — Paramètres d'environnement (Pydantic Settings)
 Responsable : Dev Backend
 """
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -12,10 +13,28 @@ class Settings(BaseSettings):
         case_sensitive=False,
     )
 
-    port: int = 3000
-    jwt_secret: str = "change_me_in_production"
-    database_url: str = "postgresql://votechain:votechain@localhost:5432/votechain"
-    redis_url: str = "redis://localhost:6379/0"
+    DATABASE_URL: str = Field(..., description="postgresql://...")
+    REDIS_URL: str = Field(..., description="redis://...")
+    JWT_SECRET: str = Field(..., min_length=1)
+    JWT_ALGORITHM: str = "HS256"
+    JWT_EXPIRE_HOURS: int = 1
+    JWT_USER_EXPIRE_HOURS: int = 168
+    FRONTEND_URL: str = "http://localhost:5173"
+    # Liste séparée par des virgules ; utilisée par CORS (Vite peut prendre 5173, 5174, etc.)
+    CORS_ORIGINS: str = (
+        "http://localhost:5173,http://localhost:5174,"
+        "http://127.0.0.1:5173,http://127.0.0.1:5174"
+    )
+    ENVIRONMENT: str = "development"
 
 
 settings = Settings()
+
+
+def cors_allow_origins() -> list[str]:
+    """Origines uniques pour CORSMiddleware (FRONTEND_URL + CORS_ORIGINS)."""
+    parts = {p.strip().rstrip("/") for p in settings.CORS_ORIGINS.split(",") if p.strip()}
+    fu = settings.FRONTEND_URL.strip().rstrip("/")
+    if fu:
+        parts.add(fu)
+    return sorted(parts)
