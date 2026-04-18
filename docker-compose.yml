@@ -1,0 +1,39 @@
+services:
+  backend:
+    build: ./backend
+    container_name: votechain-backend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend:/app
+      - backend_node_modules:/app/node_modules
+      - ./database/votechain.db:/app/data/votechain.db
+    env_file:
+      - .env
+    command: ["npm", "run", "dev"]
+    networks:
+      - votechain-net
+
+  frontend:
+    build: ./frontend
+    container_name: votechain-frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
+    environment:
+      - VITE_API_URL=http://localhost:3000
+    command: ["npm", "run", "dev", "--", "--host"]
+    depends_on:
+      - backend
+    networks:
+      - votechain-net
+
+networks:
+  votechain-net:
+    driver: bridge
+
+volumes:
+  backend_node_modules:
+  frontend_node_modules:
