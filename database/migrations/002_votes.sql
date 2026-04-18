@@ -1,0 +1,3 @@
+-- 002_votes.sql — Migration votes (alignement / évolutions futures)
+-- Responsable : Dev Backend (DB)
+-- TODO : index sur poll_id, contraintes d’unicité composite si anti-doublon

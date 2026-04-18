@@ -1,0 +1,33 @@
+services:
+  backend:
+    image: node:20-alpine
+    working_dir: /app
+    volumes:
+      - ./backend:/app
+      - ./database/votechain.db:/app/data/votechain.db
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    command: sh -c "npm install && npm run dev"
+    networks:
+      - votechain-net
+
+  frontend:
+    image: node:20-alpine
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "5173:5173"
+    env_file:
+      - .env
+    command: sh -c "npm install && npm run dev -- --host"
+    depends_on:
+      - backend
+    networks:
+      - votechain-net
+
+networks:
+  votechain-net:
+    driver: bridge

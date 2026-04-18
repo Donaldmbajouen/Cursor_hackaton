@@ -1,0 +1,3 @@
+-- 003_sessions.sql — Migration sessions (alignement / évolutions futures)
+-- Responsable : Dev Backend (DB)
+-- TODO : TTL / nettoyage des sessions expirées

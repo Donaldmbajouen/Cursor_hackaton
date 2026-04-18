@@ -1,0 +1,25 @@
+CREATE TABLE IF NOT EXISTS polls (
+  id TEXT PRIMARY KEY,
+  question TEXT NOT NULL,
+  options TEXT NOT NULL,
+  closes_at DATETIME NOT NULL,
+  creator_token TEXT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS votes (
+  id TEXT PRIMARY KEY,
+  poll_id TEXT NOT NULL REFERENCES polls(id),
+  option_index INTEGER NOT NULL,
+  ip_hash TEXT NOT NULL,
+  fingerprint TEXT NOT NULL,
+  jwt_token TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS sessions (
+  token TEXT PRIMARY KEY,
+  poll_id TEXT NOT NULL REFERENCES polls(id),
+  used INTEGER DEFAULT 0,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);

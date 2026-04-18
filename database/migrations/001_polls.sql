@@ -1,0 +1,3 @@
+-- 001_polls.sql — Migration polls (alignement / évolutions futures)
+-- Responsable : Dev Backend (DB)
+-- TODO : ajouter index ou contraintes supplémentaires si besoin
