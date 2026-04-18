@@ -1,25 +1,49 @@
 /**
- * useSocket.js — Hook connexion Socket.io client
+ * useSocket.js — Hook WebSocket (compteurs / événements vote, aligné FastAPI)
  * Responsable : Dev Frontend (temps réel)
  */
-import { useEffect, useState } from 'react';
-import { io } from 'socket.io-client';
+import { useEffect, useRef, useState } from 'react';
 
-const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
-// TODO Dev : options auth, namespaces, cleanup, reconnexion
-export function useSocket() {
-  const [socket, setSocket] = useState(null);
+function toWebSocketUrl(httpUrl, path) {
+  const u = new URL(httpUrl);
+  u.protocol = u.protocol === 'https:' ? 'wss:' : 'ws:';
+  u.pathname = path;
+  u.search = '';
+  u.hash = '';
+  return u.toString();
+}
+
+// TODO Dev : reconnexion exponentielle, heartbeat, auth query param
+export function useVoteWebSocket(pollId) {
+  const [lastMessage, setLastMessage] = useState(null);
+  const [readyState, setReadyState] = useState(WebSocket.CLOSED);
+  const wsRef = useRef(null);
 
   useEffect(() => {
-    void io;
-    void baseUrl;
-    // TODO : const s = io(baseUrl, { ... })
-    setSocket(null);
-    return () => {
-      // TODO : socket?.disconnect()
+    if (!pollId) return undefined;
+    const url = toWebSocketUrl(apiBase, `/ws/votes/${pollId}`);
+    const ws = new WebSocket(url);
+    wsRef.current = ws;
+    setReadyState(ws.readyState);
+    ws.onopen = () => setReadyState(ws.readyState);
+    ws.onclose = () => setReadyState(WebSocket.CLOSED);
+    ws.onmessage = (ev) => setLastMessage(ev.data);
+    ws.onerror = () => {
+      // TODO : telemetry / toast
     };
-  }, []);
+    return () => {
+      ws.close();
+      wsRef.current = null;
+    };
+  }, [pollId]);
 
-  return socket;
+  return { socket: wsRef.current, readyState, lastMessage };
 }
+
+/** @deprecated préférer useVoteWebSocket — alias pour imports historiques */
+export function useSocket(pollId) {
+  return useVoteWebSocket(pollId);
+}
+

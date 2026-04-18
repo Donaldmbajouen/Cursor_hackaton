@@ -1,0 +1,1 @@
+"""VoteChain — backend FastAPI."""

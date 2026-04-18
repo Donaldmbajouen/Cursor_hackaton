@@ -1,3 +1,3 @@
--- 002_votes.sql — Migration votes (alignement / évolutions futures)
+-- 002_votes.sql — Migration votes (PostgreSQL)
 -- Responsable : Dev Backend (DB)
--- TODO : index sur poll_id, contraintes d’unicité composite si anti-doublon
+-- TODO : CREATE INDEX idx_votes_poll_id ON votes(poll_id);

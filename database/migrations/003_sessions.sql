@@ -1,3 +1,3 @@
--- 003_sessions.sql — Migration sessions (alignement / évolutions futures)
+-- 003_sessions.sql — Migration sessions (PostgreSQL)
 -- Responsable : Dev Backend (DB)
--- TODO : TTL / nettoyage des sessions expirées
+-- TODO : index sur poll_id, job de purge
