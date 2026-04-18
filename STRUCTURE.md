@@ -135,3 +135,5 @@ Pour une liste brute des chemins de fichiers (hors `.git` / `node_modules` / `__
 ```bash
 find . \( -path './.git' -o -path './.git/*' -o -path '*/node_modules/*' -o -path '*/__pycache__/*' \) -prune -o -type f -print | sort
 ```
+
+cree une branche dedjomo qui suis main et push a partir de cette branche

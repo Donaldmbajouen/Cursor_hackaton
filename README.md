@@ -34,6 +34,20 @@ docker compose up --build
 cd frontend && npm install && npm run dev
 ```
 
+### Dépannage : `EACCES` sur `npm install` ou page blanche / `react_jsx-dev-runtime.js`
+
+Si tu as lancé **Docker** avant `npm install` en local, le conteneur peut avoir créé `frontend/node_modules` en **root** / **nobody** : l’installation npm échoue (`permission denied`) et Vite peut servir un bundle React incomplet (erreur dans `react_jsx-dev-runtime`).
+
+**Corriger une fois les droits puis réinstaller :**
+
+```bash
+sudo chown -R "$USER:$USER" ~/Desktop/projet/votechain/frontend
+rm -rf ~/Desktop/projet/votechain/frontend/node_modules
+cd ~/Desktop/projet/votechain/frontend && npm install && npm run dev
+```
+
+À partir de la config Compose actuelle, les dépendances npm du **frontend dans Docker** sont dans un **volume nommé** (`frontend_node_modules`), pas dans ton dossier `frontend/node_modules` : tu peux développer en local sans conflit de permissions.
+
 ### Backend seul
 
 ```bash
